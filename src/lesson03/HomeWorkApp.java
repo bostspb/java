@@ -99,7 +99,9 @@ public class HomeWorkApp {
     public static int[][] fillDiagonals(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[i].length; j++) {
-                matrix[i][j] = (i == j || (i + j) == (matrix.length - 1)) ? 1 : matrix[i][j];
+                if(i == j || (i + j) == (matrix.length - 1)) {
+                    matrix[i][j] = 1;
+                }
             }
         }
         return matrix;
@@ -127,8 +129,12 @@ public class HomeWorkApp {
         int min = intArray[0];
         int max = intArray[0];
         for (int i = 0; i < intArray.length; i++) {
-            min = (intArray[i] < min) ? intArray[i] : min;
-            max = (intArray[i] > max) ? intArray[i] : max;
+            if(intArray[i] < min) {
+                min = intArray[i];
+            }
+            if(intArray[i] > max) {
+                max = intArray[i];
+            }
         }
         int[] result = {min, max};
         return result;
