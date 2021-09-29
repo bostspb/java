@@ -1,4 +1,11 @@
-package ConsoleApp;
+package lesson04;
+/**
+ * 1) Посмотреть метод spawnEnemy метод создания врагов и модернизировать его,
+ *    чтобы враги друг на друга не накладывались на маленьких картах
+ * 2) Создать метод battle, где игрок и враг поочередно атакуют друг друга с выводом на консоль
+ * 3) Повторить все уроки с 1-4.
+ * ДЛЯ ЛЕНИВЫХ: сдать код с урока!
+ */
 
 import java.util.Random;
 import java.util.Scanner;
@@ -16,7 +23,7 @@ public class MyFirstConsoleApplication {
     public static char player = '@';
     public static String playerName = "Boris";
     public static int playerHealth = 100;
-    public static int playerStr = 15;
+    public static int playerStr = 25;
     public static int playerPosX;
     public static int playerPosY;
     public static final int playerMoveUp = 8;
@@ -58,7 +65,7 @@ public class MyFirstConsoleApplication {
         spawnEnemy();
 
         while (true) {
-            showMap();
+            showMap(map);
             movePlayer();
 
             if (!isAlivePlayer()) {
@@ -82,6 +89,7 @@ public class MyFirstConsoleApplication {
         for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
                 map[y][x] = emptyCell;
+                invisibleMap[y][x] = emptyCell;
             }
         }
 
@@ -107,18 +115,20 @@ public class MyFirstConsoleApplication {
 
         for (int i = 1; i <= countEnemies; i++) {
 
-            do {
+            while(true) {
                 enemyPosX = random.nextInt(mapWidth);
                 enemyPosY = random.nextInt(mapHeight);
-            } while ((enemyPosX == playerPosX && enemyPosY == playerPosY) && !isEmptyCell(invisibleMap, enemyPosX, enemyPosY));
-
-            invisibleMap[enemyPosY][enemyPosX] = enemy;
+                if(!(enemyPosX == playerPosX && enemyPosY == playerPosY) && isEmptyCell(invisibleMap, enemyPosX, enemyPosY)){
+                    invisibleMap[enemyPosY][enemyPosX] = enemy;
+                    break;
+                }
+            }
         }
         System.out.println("Create enemy. Count = " + countEnemies + " (HP=" + enemyHealth + ", STR=" + enemyStr + ")");
 
     }
 
-    public static void showMap() {
+    public static void showMap(char[][] map) {
         System.out.println("=====> MAP <=====");
         for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
@@ -161,15 +171,33 @@ public class MyFirstConsoleApplication {
 
     public static void playerNextMoveAction(int lastPosX, int lastPosY, int nextPosX, int nextPosY) {
         if (invisibleMap[nextPosY][nextPosX] == enemy) {
-            playerHealth -= enemyStr;
-            System.out.println("ALERT! Enemy give damage " + enemyStr + ". " + playerName + " health now " + playerHealth);
+            battle();
         }
 
-        countEnemies--;
         invisibleMap[nextPosY][nextPosX] = emptyCell;
         map[lastPosY][lastPosX] = readyCell;
         map[playerPosY][playerPosX] = player;
         System.out.println("Count enemies = " + countEnemies);
+    }
+
+    public static void battle() {
+        int currentEnemyHealth = enemyHealth;
+        boolean isPlayerHit = isMyFirstHit();
+        while (playerHealth > 0 && currentEnemyHealth > 0) {
+            if (isPlayerHit) {
+                currentEnemyHealth = (playerStr > currentEnemyHealth) ? 0 : currentEnemyHealth - playerStr;
+                System.out.println("ALERT! " + playerName + " give damage enemy. Enemy health now " + currentEnemyHealth + "/" + enemyHealth);
+                isPlayerHit = false;
+            } else {
+                playerHealth = (enemyStr > playerHealth) ? 0 : playerHealth - enemyStr;
+                System.out.println("ALERT! Enemy give damage " + enemyStr + ". " + playerName + " health now " + playerHealth);
+                isPlayerHit = true;
+            }
+        }
+
+        if(currentEnemyHealth <= 0) {
+            countEnemies--;
+        }
     }
 
     public static boolean isEmptyCell(char[][] mapCheck, int x, int y) {
@@ -198,5 +226,9 @@ public class MyFirstConsoleApplication {
 
     public static boolean isExistEnemies() {
         return countEnemies > 0;
+    }
+
+    public static boolean isMyFirstHit() {
+        return random.nextBoolean();
     }
 }
